@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:avro.apache.org)",
+      "WebFetch(domain:plugins.gradle.org)",
+      "WebFetch(domain:maven.apache.org)",
+      "WebFetch(domain:issues.apache.org)",
+      "Bash(./gradlew:*)"
+    ],
+    "deny": []
+  }
+}
