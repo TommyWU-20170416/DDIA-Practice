@@ -14,23 +14,16 @@ java {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    // 根项目不需要实际依赖，这里只是为了避免构建错误
-    implementation(platform("org.springframework.boot:spring-boot-dependencies:3.5.5"))
+allprojects {
+    repositories {
+        mavenCentral()
+    }
 }
 
 subprojects {
     apply(plugin = "java")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "io.spring.dependency-management")
-
-    repositories {
-        mavenCentral()
-    }
 
     dependencies {
         implementation("org.springframework.boot:spring-boot-starter")
