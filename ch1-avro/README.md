@@ -45,9 +45,23 @@
     // 由於已經引用 spring boot starter web 會帶入 jackson core，所以只要引入 avro 就好
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-avro:2.15.2")
     ```
-3. 比較 JSON vs Avro 的大小與效能差異。
+3. 比較 JSON vs Avro 的大小與效能差異。[CompareUtils.java](src/main/java/com/example/ch1avro/utils/CompareUtils.java)
     1. 序列化後的 byte array 長度 → 看空間大小差異
-    2. 序列化 + 反序列化的耗時 → 看效能差異
+       ```text
+       avroBytes.length: 16, jsonBytes.length: 63
+       ```
+    2. 序列化 + 反序列化的耗時 → 看效能差異(參考下方QA [為什麼 JSON serialize 比較快](#為什麼-json-serialize-比較快))
+       ```text
+       --- serialize time compare ---
+       Avro Origin serialize time: 551 ms
+       Avro Jackson serialize time: 683 ms
+       Json serialize time: 360 ms
+
+       --- deserialize time compare ---
+       Avro Origin deserialize time: 571 ms
+       Avro Jackson deserialize time: 622 ms
+       Json deserialize time: 601 ms
+       ```
 
 ### 跟 Spring Boot 整合（模擬微服務傳輸）
 
@@ -134,6 +148,7 @@ A: 你可以透過以下練習來了解 Avro 和 Protocol Buffers 的優缺點�
 - 資源受限環境
     - 在嵌入式系統或移動應用中，使用 Avro 或 Protocol Buffers 可以節省儲存空間和計算資源。
 
+
 ## 為什麼 JSON serialize 比較快？
 
 - Jackson JSON 寫入高度優化
@@ -149,15 +164,15 @@ A: 你可以透過以下練習來了解 Avro 和 Protocol Buffers 的優缺點�
 
 - 字串解析開銷大
     - JSON 反序列化需將字串解析成物件，包含字串分割、型別轉換、欄位對應，這些步驟在大量資料下開銷較大。
-    
+
 - Jackson 反序列化流程複雜
     - Jackson 需動態反射、型別推斷、欄位映射，這些都比序列化時多了不少步驟。
 
 - Avro 二進位格式解析快
     - Avro 反序列化直接根據 schema 解析二進位資料，流程固定且少了字串處理，反而在反序列化時更有效率。
 
-> 總結： 
-> - JSON serialize 快，因為格式簡單、流程少。 
-> - JSON deserialize 慢，因為字串解析和型別推斷開銷大。 
-> - Avro serialize/deserialize 都有 schema 驗證，但反序列化時二進位解析流程更快，反而優於 JSON。 
+> 總結：
+> - JSON serialize 快，因為格式簡單、流程少。
+> - JSON deserialize 慢，因為字串解析和型別推斷開銷大。
+> - Avro serialize/deserialize 都有 schema 驗證，但反序列化時二進位解析流程更快，反而優於 JSON。
 > - 這也是為什麼大數據系統常用 Avro 來做資料交換，尤其在反序列化效能要求高的場景。

@@ -1,4 +1,4 @@
-package com.example.ch1avro;
+package com.example.ch1avro.com.example.ch1avro.functional;
 
 @FunctionalInterface
 public interface ThrowingRunnable {

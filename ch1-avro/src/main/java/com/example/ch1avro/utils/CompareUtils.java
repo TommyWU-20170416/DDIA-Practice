@@ -1,7 +1,7 @@
 package com.example.ch1avro.utils;
 
-import com.example.ch1avro.ThrowingConsumer;
-import com.example.ch1avro.ThrowingRunnable;
+import com.example.ch1avro.com.example.ch1avro.functional.ThrowingConsumer;
+import com.example.ch1avro.com.example.ch1avro.functional.ThrowingRunnable;
 import com.example.ch1avro.domain.User;
 import com.example.ch1avro.mapper.UserAvroMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,13 +21,9 @@ public class CompareUtils {
     private static ObjectMapper jsonMapper = new ObjectMapper();
 
     public static void compareSizes() throws Exception {
-        ObjectMapper jsonMapper = new ObjectMapper();
-
-        // compare the bytes length
         final byte[] avroBytes = UserAvroMapper.avroSerializeUser(userAvro);
         final byte[] jsonBytes = jsonMapper.writeValueAsBytes(userJson);
 
-        // avroBytes.length: 16, jsonBytes.length: 63
         System.out.println("avroBytes.length: " + avroBytes.length + ", jsonBytes.length: " + jsonBytes.length);
     }
 
