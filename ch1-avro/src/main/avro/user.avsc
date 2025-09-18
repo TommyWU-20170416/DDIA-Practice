@@ -1,10 +1,10 @@
 {
   "namespace": "user.avro",
   "type": "record",
-  "name": "User",
+  "name": "UserAvro",
   "fields": [
     { "name": "name", "type": "string" },
-    { "name": "favorite_number", "type": [ "int", "null" ] },
-    { "name": "favorite_color", "type": [ "string", "null" ] }
+    { "name": "favoriteNumber", "type": [ "int", "null" ] },
+    { "name": "favoriteColor", "type": [ "string", "null" ] }
   ]
 }

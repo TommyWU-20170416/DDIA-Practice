@@ -10,7 +10,7 @@ description = "DDIA-Practice"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(24)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -20,6 +20,8 @@ allprojects {
     }
 }
 
+val lombokVersion = "1.18.42"
+
 subprojects {
     apply(plugin = "java")
     apply(plugin = "org.springframework.boot")
@@ -28,8 +30,12 @@ subprojects {
     dependencies {
         implementation("org.springframework.boot:spring-boot-starter")
         implementation("org.springframework.boot:spring-boot-starter-web")
+
         testImplementation("org.springframework.boot:spring-boot-starter-test")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+        compileOnly("org.projectlombok:lombok:${lombokVersion}")
+        annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
     }
 
     tasks.withType<Test> {

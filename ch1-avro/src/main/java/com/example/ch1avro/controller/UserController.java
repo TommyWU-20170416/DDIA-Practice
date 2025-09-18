@@ -2,14 +2,21 @@ package com.example.ch1avro.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import user.avro.User;
+
+import com.example.ch1avro.utils.CompareUtils;
 
 @RestController
 public class UserController {
 
-    @GetMapping("/user")
-    public User getUser() {
-        User user = new User("Tommy", 42, "blue");
-        return user;
+    @GetMapping("/compareSize")
+    public void compareSize() throws Exception {
+        System.out.println("--- size compare ---");
+        CompareUtils.compareSizes();
+
+        System.out.println("\n--- serialize time compare ---");
+        CompareUtils.compareSerializeTime();
+
+        System.out.println("\n--- deserialize time compare ---");
+        CompareUtils.compareDeserializeTime();
     }
 }
