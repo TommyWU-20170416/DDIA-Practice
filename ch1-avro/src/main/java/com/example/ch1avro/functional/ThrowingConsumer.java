@@ -1,4 +1,4 @@
-package com.example.ch1avro.com.example.ch1avro.functional;
+package com.example.ch1avro.functional;
 
 import java.util.function.Consumer;
 

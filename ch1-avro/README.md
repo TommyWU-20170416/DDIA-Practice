@@ -6,14 +6,13 @@
 
 - [Apache Avro 官方文件](https://avro.apache.org/docs/current/)
 - [gradle-avro-plugin 產出物件套件](ttps://github.com/davidmc24/gradle-avro-plugin)
-- [Protocol Buffers 官方文件](https://developers.google.com/protocol-buffers)
 
 ## 學習步驟
 
 ### 學習如何定義 Avro Schema
 
-1. 創建 .avsc 在 `/ch1-avro/src/main/avro/user.avsc`
-2. 安裝 Avro Schema Support 這樣閱讀 [.avsc](src/main/java/com/example/ch1avro/data/.avsc) 才可以看得懂
+1. 創建 .avsc 在 `/ch1-avro/src/main/avro/userJson.avsc`
+2. 安裝 plugin: Avro Schema Support 這樣閱讀 [userJson.avsc](src/main/avro/userJson.avsc) 才可以看得懂
 3. build.gradle.kts 裡面加入 avro 的 plugin
     ```kotlin
     plugins {
@@ -29,28 +28,31 @@
     cd ch1-avro 
     ./gradlew generateAvroJava
     # BUILD SUCCESSFUL in 558ms
-    # 檔案會在 /ch1-avro/build/generated-main-avro-java/user/avro/User.java
+    # 檔案會在 [UserAvro.java](build/generated-main-avro-java/userJson/avro/UserAvro.java)
     ``` 
 5. 產生的 class 可以直接使用
     ```java
-    User user = new User("Tommy", 42, "blue");
+    UserAvro userAvro = new UserAvro(name, favoriteNumber, favoriteColor);
     ```
 
 ### 使用 Avro 序列化/反序列化
 
 1. 用 DatumWriter 把 User 物件寫成 Avro 二進位檔案, 用 DatumReader 讀回 User 物件。
+    - [UserAvroMapper.java](src/main/java/com/example/ch1avro/mapper/UserAvroMapper.java)
 2. 用 Jackson
     1. 引用套件
     ```kotlin
     // 由於已經引用 spring boot starter web 會帶入 jackson core，所以只要引入 avro 就好
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-avro:2.15.2")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-avro:2.17.2")
     ```
-3. 比較 JSON vs Avro 的大小與效能差異。[CompareUtils.java](src/main/java/com/example/ch1avro/utils/CompareUtils.java)
+3. 比較 JSON vs Avro
+   的大小與效能差異。[CompareUtils.java](src/main/java/com/example/ch1avro/utils/CompareUtils.java)
     1. 序列化後的 byte array 長度 → 看空間大小差異
        ```text
        avroBytes.length: 16, jsonBytes.length: 63
        ```
-    2. 序列化 + 反序列化的耗時 → 看效能差異(參考下方QA [為什麼 JSON serialize 比較快](#為什麼-json-serialize-比較快))
+    2. 序列化 + 反序列化的耗時 → 看效能差異(
+       參考下方QA [為什麼 JSON serialize 比較快](#為什麼-json-serialize-比較快))
        ```text
        --- serialize time compare ---
        Avro Origin serialize time: 551 ms
@@ -65,15 +67,40 @@
 
 ### 跟 Spring Boot 整合（模擬微服務傳輸）
 
-建一個 API 回傳 JSON，另一個 API 回傳 Avro（用 application/avro content-type）。
-Client 分別請求，觀察傳輸量。
+> 建一個 API 回傳 JSON，另一個 API 回傳 Avro（用 application/avro content-type）。
+>
+> Client
+> 分別請求，觀察傳輸量 [UserController.java](src/main/java/com/example/ch1avro/controller/UserController.java)
 
-### Schema 演化（Avro 很大的特色）
+1. GET http://localhost:8080/getJsonUser
+    - Content-Length :62
 
-先定義 User schema (v1)。
-再修改 schema，加一個 phoneNumber 欄位 (v2)。
-測試 v1 的資料能否用 v2 schema 讀取。
-這就是 Avro 強項：向前/向後相容。
+2. GET http://localhost:8080/getAvroUser
+    - Content-Length :15
+
+### Schema 演化（**Avro 很大的特色**）
+
+> Avro 強項：向前/向後相容，如何做到
+
+- 在 avro 內有 write and read schema，寫入時會把 schema 的 version 一起寫入檔案中，讀取時會用 read schema 去讀取檔案
+    - write schema 是寫入時的 schema
+    - read schema 是讀取時的 schema
+
+- 向後相容
+    - 舊版的資料可以被新版的讀取
+- 向前相容
+    - 新版的資料可以被舊版的讀取（[什麼時候會用到向前相容](#什麼時候會用到向前相容)）
+
+- 情境
+    - 舊資料是 v1 schema 寫入的，使用 v2 schema 讀取（向後相容）
+        - v2 新增: v2 有，v1 沒有的欄位 → 用 default 值補足
+        - v2 刪除: v1 有，v2 沒有的欄位 → 被忽略
+    - 新資料是 v2 schema 寫入的，使用 v1 schema 讀取（向前相容）
+        - v2 新增: v2 有，v1 沒有的欄位 → 忽略
+        - v2 刪除: v1 有，v2 沒有的欄位 → 舊程式碼讀新資料會失敗 → 破壞向前相容（forward compatibility）
+
+> ref: https://www.creekservice.org/articles/2024/01/08/json-schema-evolution-part-1.html
+![img.png](doc/img.png)
 
 # 學習ＱＡ
 
@@ -148,7 +175,6 @@ A: 你可以透過以下練習來了解 Avro 和 Protocol Buffers 的優缺點�
 - 資源受限環境
     - 在嵌入式系統或移動應用中，使用 Avro 或 Protocol Buffers 可以節省儲存空間和計算資源。
 
-
 ## 為什麼 JSON serialize 比較快？
 
 - Jackson JSON 寫入高度優化
@@ -176,3 +202,21 @@ A: 你可以透過以下練習來了解 Avro 和 Protocol Buffers 的優缺點�
 > - JSON deserialize 慢，因為字串解析和型別推斷開銷大。
 > - Avro serialize/deserialize 都有 schema 驗證，但反序列化時二進位解析流程更快，反而優於 JSON。
 > - 這也是為什麼大數據系統常用 Avro 來做資料交換，尤其在反序列化效能要求高的場景。
+
+## 什麼時候會用到向前相容
+
+1. 舊版客戶端 / API 消費者仍在使用
+
+- 假設你有一個微服務系統或 API，前端或第三方客戶端還沒升級到最新版本：
+    - 新版後端或服務寫入了 v2/v3 JSON 或 Avro 資料
+    - 舊客戶端仍使用 v1 版本的程式碼 讀取資料
+- 如果 schema 新增欄位但舊程式能忽略新增欄位 → 讀取成功 → 向前相容
+
+> 例子：Kafka topic 中產生新欄位資料，但舊消費者仍在消費舊 schema 的程式碼。
+
+2. 系統資料庫升級，但舊工具還在用
+
+- 資料表結構或 JSON/Avro schema 升級
+- 舊分析工具、報表程式或 ETL 腳本尚未更新
+- 如果新資料包含舊程式碼不認識的欄位，向前相容能保證舊程式仍能讀到 舊欄位資料 並忽略新欄位
+

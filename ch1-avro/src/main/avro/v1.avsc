@@ -1,0 +1,8 @@
+{
+  "type": "record",
+  "name": "UserName",
+  "namespace": "com.example.v1",
+  "fields": [
+    {"name": "name", "type": "string"}
+  ]
+}

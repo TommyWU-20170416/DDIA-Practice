@@ -1,8 +1,8 @@
 package com.example.ch1avro.utils;
 
-import com.example.ch1avro.com.example.ch1avro.functional.ThrowingConsumer;
-import com.example.ch1avro.com.example.ch1avro.functional.ThrowingRunnable;
-import com.example.ch1avro.domain.User;
+import com.example.ch1avro.functional.ThrowingConsumer;
+import com.example.ch1avro.functional.ThrowingRunnable;
+import com.example.ch1avro.domain.UserJson;
 import com.example.ch1avro.mapper.UserAvroMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -16,7 +16,7 @@ public class CompareUtils {
     private static final String favoriteColor = "yellow";
 
     private static final UserAvro userAvro = new UserAvro(name, favoriteNumber, favoriteColor);
-    private static final User userJson = new User(name, favoriteNumber, favoriteColor);
+    private static final UserJson userJson = new UserJson(name, favoriteNumber, favoriteColor);
 
     private static ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -54,7 +54,7 @@ public class CompareUtils {
 
         measureDeserializeTime(avroBytes, UserAvroMapper::avroDeserializeUser, "Avro Origin");
         measureDeserializeTime(avroBytes, UserAvroMapper::jacksonDeserialize, "Avro Jackson");
-        measureDeserializeTime(jsonBytes, bytes -> jsonMapper.readValue(bytes, User.class), "Json");
+        measureDeserializeTime(jsonBytes, bytes -> jsonMapper.readValue(bytes, UserJson.class), "Json");
     }
 
     private static void measureDeserializeTime(byte[] data, ThrowingConsumer<byte[]> deserializer,

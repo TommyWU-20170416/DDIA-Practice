@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class UserJson {
     private String name;
     private Integer favorite_number;
     private String favorite_color;
